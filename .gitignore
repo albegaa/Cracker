@@ -1,0 +1,8 @@
+# 가상환경 및 패키지
+venv/
+node_modules/
+.next/
+
+# 보안 정보
+.env
+__pycache__/
