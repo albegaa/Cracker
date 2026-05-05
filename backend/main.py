@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import auth, problems, logs    # logs 추가
+from routers import auth, problems, logs, attack    # attack 추가
 
 app = FastAPI(title="Cracker API")
 
@@ -14,7 +14,8 @@ app.add_middleware(
 
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(problems.router, prefix="/api/problems", tags=["problems"])
-app.include_router(logs.router, prefix="/api/logs", tags=["logs"])    # 추가
+app.include_router(logs.router, prefix="/api/logs", tags=["logs"])
+app.include_router(attack.router, prefix="/api/attack", tags=["attack"])    # 추가
 
 @app.get("/health")
 async def health_check():
