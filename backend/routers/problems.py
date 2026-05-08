@@ -13,6 +13,7 @@ class Problem(BaseModel):
     description: str
     hint: str = ""
     system_prompt: str    # 타겟 LLM에게 줄 방어 지시문
+    secret: str           # 판정 기준값 - FE에 노출 안 됨
 
 # 문제 전체 조회
 @router.get("/")
@@ -21,6 +22,8 @@ async def get_problems():
     for p in problems:
         p["id"] = str(p["_id"])
         del p["_id"]
+        p.pop("secret", None)
+        p.pop("system_prompt", None)
     return problems
 
 # 문제 단건 조회
@@ -31,6 +34,8 @@ async def get_problem(problem_id: str):
         raise HTTPException(404, "문제를 찾을 수 없습니다")
     p["id"] = str(p["_id"])
     del p["_id"]
+    p.pop("secret", None)
+    p.pop("system_prompt", None)
     return p
 
 # 문제 생성

@@ -1,19 +1,18 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from core.auth import get_current_user
 from core.config import settings
-from db.mongo import logs_col      # 추가
-from datetime import datetime       # 추가
+from db.mongo import logs_col, problems_col
+from bson import ObjectId
+from datetime import datetime
 import re
-import hashlib                      # 추가
+import hashlib
 
 router = APIRouter()
 
 class AttackRequest(BaseModel):
     problem_id: str
-    system_prompt: str
     user_prompt: str
-    secret: str
 
 class LayerResult(BaseModel):
     passed: bool
@@ -78,12 +77,18 @@ async def handle_attack(
     req: AttackRequest,
     user_id: str = Depends(get_current_user)
 ):
+    # DB에서 system_prompt, secret 조회
+    problem = await problems_col.find_one({"_id": ObjectId(req.problem_id)})
+    if not problem:
+        raise HTTPException(404, "문제를 찾을 수 없습니다")
+    system_prompt = problem["system_prompt"]
+    secret = problem["secret"]
+
     is_mocked = not bool(settings.openai_api_key)
 
     # 1단계: 입력 필터
     input_result = input_filter(req.user_prompt)
     if not input_result.passed:
-        # T10: DB 저장
         await logs_col.insert_one({
             "user_id": hashlib.sha256(user_id.encode()).hexdigest()[:16],
             "problem_id": req.problem_id,
@@ -102,12 +107,11 @@ async def handle_attack(
         )
 
     # 2단계: LLM 호출
-    reply = await call_llm(req.system_prompt, req.user_prompt)
+    reply = await call_llm(system_prompt, req.user_prompt)
 
     # 3단계: 출력 필터
-    output_result = output_filter(reply, req.secret)
+    output_result = output_filter(reply, secret)
     if not output_result.passed:
-        # T10: DB 저장
         await logs_col.insert_one({
             "user_id": hashlib.sha256(user_id.encode()).hexdigest()[:16],
             "problem_id": req.problem_id,
@@ -126,9 +130,8 @@ async def handle_attack(
         )
 
     # T8: 판정
-    is_success = judge(reply, req.secret)
+    is_success = judge(reply, secret)
 
-    # T10: DB 저장
     await logs_col.insert_one({
         "user_id": hashlib.sha256(user_id.encode()).hexdigest()[:16],
         "problem_id": req.problem_id,
