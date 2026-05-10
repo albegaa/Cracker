@@ -23,8 +23,14 @@ const difficultyStyle = {
 
 export default function ProblemsPage() {
   const router = useRouter()
+
+  // 전체 문제 목록 (API로 받아온 원본 데이터)
   const [problems, setProblems] = useState<Problem[]>([])
   const [isLoading, setIsLoading] = useState(true)
+
+  // 현재 선택된 필터 상태
+  const [selectedType, setSelectedType] = useState('all') 
+  const [selectedDiff, setSelectedDiff] = useState('all')
 
   useEffect(() => {
     if (!isLoggedIn()) {
@@ -37,6 +43,14 @@ export default function ProblemsPage() {
     })
   }, [router])
 
+  // 필터링 로직
+  // problems 배열에서 선택된 조건에 맞는 문제만 고름
+  const filteredProblems = problems.filter((problem) => {
+    const matchType = selectedType === 'all' || problem.attack_type === selectedType
+    const matchDiff = selectedDiff === 'all' || problem.difficulty === selectedDiff
+    return matchType && matchDiff  // 두 조건 모두 만족해야 통과
+  })
+
   return (
     <main className="mx-auto max-w-6xl px-6 py-12">
 
@@ -46,12 +60,45 @@ export default function ProblemsPage() {
         <p className="mt-2 text-sm text-gray-500">문제를 선택하고 실력을 테스트해보세요.</p>
       </div>
 
+      {/* 필터 드롭다운 2개 */}
+      <div className="mb-8 flex gap-4">
+
+        {/* 공격 유형 필터 */}
+        {/* selectedType 상태가 바뀌면 filteredProblems가 자동으로 다시 계산됨 */}
+        <select
+          value={selectedType}
+          onChange={(e) => setSelectedType(e.target.value)}
+          className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-700 outline-none focus:border-black"
+        >
+          <option value="all">공격 유형 - 전체</option>
+          <option value="prompt_injection">프롬프트 인젝션</option>
+          <option value="jailbreak">탈옥</option>
+          <option value="obfuscation">난독화</option>
+          <option value="challenge">챌린지</option>
+        </select>
+
+        {/* 난이도 필터 */}
+        <select
+          value={selectedDiff}
+          onChange={(e) => setSelectedDiff(e.target.value)}
+          className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-700 outline-none focus:border-black"
+        >
+          <option value="all">모든 난이도</option>
+          <option value="easy">Easy</option>
+          <option value="medium">Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+      </div>
+
       {/* 문제 카드 그리드 */}
       {isLoading ? (
         <p className="text-sm text-gray-400">불러오는 중...</p>
+      ) : filteredProblems.length === 0 ? (
+        // 필터 결과가 없을 때
+        <p className="text-sm text-gray-400">해당하는 문제가 없습니다.</p>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {problems.map((problem) => (
+          {filteredProblems.map((problem) => (
             <div
               key={problem.id}
               className="flex flex-col justify-between rounded-xl border border-gray-200 bg-white p-6"
