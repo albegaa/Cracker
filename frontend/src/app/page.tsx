@@ -1,101 +1,102 @@
-import Image from "next/image";
+// page.tsx
+// 홈(메인인) 페이지
+// 플랫폼 소개 및 학습/실습 페이지로 이동하는 버튼 제공
 
-export default function Home() {
+'use client'
+
+import Link from 'next/link'
+
+const features = [
+  {
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 5h7" /><path d="M9 3v2c0 4.418-2.239 8-5 8" />
+        <path d="M11 17a9 9 0 0 1-8-4" /><path d="M21 5h-7" />
+        <path d="M15 3v2c0 4.418 2.239 8 5 8" /><path d="M13 17a9 9 0 0 0 8-4" />
+      </svg>
+    ),
+    title: '한국어 특화 공격 유형 학습',
+    description: '한국어의 언어적 특성을 반영한 학습 및 실습',
+  },
+  {
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+        <line x1="4" y1="22" x2="4" y2="15" />
+      </svg>
+    ),
+    title: 'CTF / 워게임 방식 실습',
+    description: '다양한 문제에 도전하고 보상을 획득하세요',
+  },
+  {
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="18" y1="20" x2="18" y2="10" />
+        <line x1="12" y1="20" x2="12" y2="4" />
+        <line x1="6" y1="20" x2="6" y2="14" />
+      </svg>
+    ),
+    title: '공격 결과 시각화 및 피드백 제공',
+    description: '내 공격에 대한 설명과 분석을 확인하세요',
+  },
+]
+
+export default function HomePage() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <main className="flex min-h-[calc(100vh-65px)] flex-col items-center justify-start bg-white px-6 pt-24">
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      {/* 히어로 섹션 */}
+      <div className="flex flex-col items-center text-center">
+
+        {/* 로고 */}
+        <div className="mb-8 flex h-24 w-24 items-center justify-center rounded-full bg-black">
+          <div className="grid h-10 w-10 grid-cols-3 gap-0.5 p-1">
+            {Array.from({ length: 9 }).map((_, i) => (
+              <div key={i} className="rounded-sm bg-white" />
+            ))}
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+
+        {/* 타이틀 */}
+        <h1 className="mb-4 text-4xl font-bold tracking-tight text-black">
+          크래커 - LLM 보안 학습 플랫폼
+        </h1>
+        <p className="mb-10 text-base text-gray-500">
+          지금 바로 프롬프트 인젝션을 학습하고, 한국어 특화 AI와 직접 실습하세요.
+        </p>
+
+        {/* CTA 버튼 */}
+        <div className="flex gap-4">
+          <Link
+            href="/learn"
+            className="rounded-lg bg-black px-10 py-3 text-sm font-medium text-white transition-opacity hover:opacity-80"
+          >
+            학습하러 가기
+          </Link>
+          <Link
+            href="/problems"
+            className="rounded-lg border border-black px-10 py-3 text-sm font-medium text-black transition-colors hover:bg-gray-50"
+          >
+            실습하러 가기
+          </Link>
+        </div>
+      </div>
+
+      {/* 피처 카드 섹션 */}
+      <div className="mt-20 grid w-full max-w-4xl grid-cols-1 gap-4 sm:grid-cols-3">
+        {features.map((feature) => (
+          <div
+            key={feature.title}
+            className="rounded-xl border border-gray-200 bg-white p-6"
+          >
+            <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-lg bg-black">
+              {feature.icon}
+            </div>
+            <h3 className="mb-2 text-sm font-semibold text-black">{feature.title}</h3>
+            <p className="text-sm text-gray-500">{feature.description}</p>
+          </div>
+        ))}
+      </div>
+    </main>
+  )
 }
