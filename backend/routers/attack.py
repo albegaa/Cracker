@@ -95,48 +95,50 @@ async def handle_attack(
 
     is_mocked = not bool(settings.openai_api_key)
 
-    # 1단계: 입력 필터
-    input_result = input_filter(req.user_prompt)
-    if not input_result.passed:
-        await logs_col.insert_one({
-            "user_id": hashlib.sha256(user_id.encode()).hexdigest()[:16],
-            "problem_id": req.problem_id,
-            "attack_prompt": req.user_prompt,
-            "response": "입력이 보안 정책에 의해 차단되었습니다.",
-            "is_success": False,
-            "blocked_at": "input",
-            "attack_type": "blocked_input",
-            "created_at": datetime.utcnow()
-        })
-        return AttackResponse(
-            reply="입력이 보안 정책에 의해 차단되었습니다.",
-            is_success=False,
-            blocked_at="input",
-            is_mocked=is_mocked
-        )
+    # 1단계: 입력 필터 (문제 설정에 따라 적용)
+    if problem.get("use_input_filter", True):
+        input_result = input_filter(req.user_prompt)
+        if not input_result.passed:
+            await logs_col.insert_one({
+                "user_id": hashlib.sha256(user_id.encode()).hexdigest()[:16],
+                "problem_id": req.problem_id,
+                "attack_prompt": req.user_prompt,
+                "response": "입력이 보안 정책에 의해 차단되었습니다.",
+                "is_success": False,
+                "blocked_at": "input",
+                "attack_type": "blocked_input",
+                "created_at": datetime.utcnow()
+            })
+            return AttackResponse(
+                reply="입력이 보안 정책에 의해 차단되었습니다.",
+                is_success=False,
+                blocked_at="input",
+                is_mocked=is_mocked
+            )
 
     # 2단계: LLM 호출
     reply = await call_llm(system_prompt, req.user_prompt)
 
-    # 3단계: 출력 필터
-    output_result = output_filter(reply, secret)
-    if not output_result.passed:
-        await logs_col.insert_one({
-            "user_id": hashlib.sha256(user_id.encode()).hexdigest()[:16],
-            "problem_id": req.problem_id,
-            "attack_prompt": req.user_prompt,
-            "response": "응답이 보안 정책에 의해 차단되었습니다.",
-            "is_success": False,
-            "blocked_at": "output",
-            "attack_type": "blocked_output",
-            "created_at": datetime.utcnow()
-        })
-        return AttackResponse(
-            reply="응답이 보안 정책에 의해 차단되었습니다.",
-            is_success=False,
-            blocked_at="output",
-            is_mocked=is_mocked
-        )
+    # 3단계: 출력 필터 (문제 설정에 따라 적용)
+    if problem.get("use_output_filter", True):
+        output_result = output_filter(reply, secret)
+        if not output_result.passed:
+            await logs_col.insert_one({
+                "user_id": hashlib.sha256(user_id.encode()).hexdigest()[:16],
+                "problem_id": req.problem_id,
+                "attack_prompt": req.user_prompt,
+                "response": "응답이 보안 정책에 의해 차단되었습니다.",
+                "is_success": False,
+                "blocked_at": "output",
+                "attack_type": "blocked_output",
+                "created_at": datetime.utcnow()
+            })
+            return AttackResponse(
+                reply="응답이 보안 정책에 의해 차단되었습니다.",
+                is_success=False,
+                blocked_at="output",
+                is_mocked=is_mocked
+            )
 
     # T8: 판정
     is_success = await judge(reply, secret)
