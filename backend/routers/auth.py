@@ -50,4 +50,8 @@ async def login(req: LoginRequest):
     if not user or not pwd_context.verify(req.password, user["password"]):
         raise HTTPException(401, "이메일 또는 비밀번호가 올바르지 않습니다")
 
-    return {"message": "로그인 성공", "token": create_token(str(user["_id"]))}
+    return {
+        "message": "로그인 성공",
+        "token": create_token(str(user["_id"])),
+        "username": user["username"]   # 추가
+    }
