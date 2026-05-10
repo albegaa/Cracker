@@ -90,6 +90,9 @@ async def handle_attack(
     system_prompt = problem["system_prompt"]
     secret = problem["secret"]
 
+    # {secret} 치환 추가
+    system_prompt = system_prompt.replace("{secret}", secret)
+
     is_mocked = not bool(settings.openai_api_key)
 
     # 1단계: 입력 필터
@@ -136,7 +139,7 @@ async def handle_attack(
         )
 
     # T8: 판정
-is_success = await judge(reply, secret)
+    is_success = await judge(reply, secret)
 
     await logs_col.insert_one({
         "user_id": hashlib.sha256(user_id.encode()).hexdigest()[:16],
