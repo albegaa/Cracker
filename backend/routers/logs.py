@@ -45,3 +45,20 @@ async def get_logs_by_problem(problem_id: str, user_id: str = Depends(get_curren
         l["id"] = str(l["_id"])
         del l["_id"]
     return logs
+
+# 내가 해결한 문제 목록 조회
+@router.get("/me/solved")
+async def get_solved_problems(user_id: str = Depends(get_current_user)):
+    # 현재 로그인한 사용자의 비식별화 ID
+    hashed_user_id = hashlib.sha256(user_id.encode()).hexdigest()[:16]
+    
+    # is_success: true인 로그에서 problem_id만 추출
+    logs = await logs_col.find(
+        {"user_id": hashed_user_id, "is_success": True},
+        {"problem_id": 1, "_id": 0}
+    ).to_list(1000)
+    
+    # 중복 제거
+    solved_problem_ids = list(set([log["problem_id"] for log in logs]))
+    
+    return {"solved_problem_ids": solved_problem_ids}

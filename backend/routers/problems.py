@@ -14,11 +14,14 @@ class Problem(BaseModel):
     hint: str = ""
     system_prompt: str    # 타겟 LLM에게 줄 방어 지시문
     secret: str           # 판정 기준값 - FE에 노출 안 됨
+    use_input_filter: bool = True    # 추가
+    use_output_filter: bool = True   # 추가
+    order: int = 0              # 추가
 
 # 문제 전체 조회
 @router.get("/")
 async def get_problems():
-    problems = await problems_col.find().to_list(100)
+    problems = await problems_col.find().sort("order", 1).to_list(100)  # 정렬 추가
     for p in problems:
         p["id"] = str(p["_id"])
         del p["_id"]
