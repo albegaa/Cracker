@@ -39,10 +39,7 @@ export default function LoginPage() {
       const res = await login(email, password)
 
       saveToken(res.token)
-
-      // 현재 로그인 API 응답에 username이 없어서 email의 앞부분을 username 대신 임시로 사용중
-      // 논의 후 saveUsername(res.username) 으로 수정 예정
-      saveUsername(email.split('@')[0])
+      saveUsername(res.username)
 
       router.push('/')
 

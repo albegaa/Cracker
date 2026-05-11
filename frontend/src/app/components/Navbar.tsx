@@ -6,11 +6,19 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { isLoggedIn, removeToken, getUsername } from '../lib/api'
+import { useEffect, useState } from 'react'
+import { removeToken } from '../lib/api'
 
 export default function Navbar() {
   const pathname = usePathname()
   const router = useRouter()
+  const [loggedIn, setLoggedIn] = useState(false)
+  const [username, setUsername] = useState('사용자')
+
+  useEffect(() => {
+    setLoggedIn(!!localStorage.getItem('token'))
+    setUsername(localStorage.getItem('username') || '사용자')
+  }, [pathname])
 
   const handleLogout = () => {
     removeToken()
@@ -28,9 +36,6 @@ export default function Navbar() {
     { href: '/ranking', label: 'Ranking' },
     { href: '/mypage', label: 'My Page' },
   ]
-
-  const loggedIn = isLoggedIn()
-  const username = getUsername() || '사용자'
 
   return (
     <nav className="border-b border-gray-200 bg-white">
