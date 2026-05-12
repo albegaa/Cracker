@@ -47,17 +47,18 @@ def input_filter(user_prompt: str) -> LayerResult:
     return LayerResult(passed=True)
 
 async def call_llm(system_prompt: str, user_prompt: str) -> str:
-    if settings.openai_api_key:
-        from openai import AsyncOpenAI
-        client = AsyncOpenAI(api_key=settings.openai_api_key)
-        response = await client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ]
+    if settings.gemini_api_key:
+        from google import genai
+        from google.genai import types
+        client = genai.Client(api_key=settings.gemini_api_key)
+        response = client.models.generate_content(
+            model="gemini-2.5-flash-lite",
+            config=types.GenerateContentConfig(
+                system_instruction=system_prompt
+            ),
+            contents=user_prompt
         )
-        return response.choices[0].message.content
+        return response.text
     else:
         return f"[Mock] 입력하신 '{user_prompt}'에 대한 응답입니다. 요청하신 정보는 제공할 수 없습니다."
 
@@ -93,7 +94,7 @@ async def handle_attack(
     # {secret} 치환 추가
     system_prompt = system_prompt.replace("{secret}", secret)
 
-    is_mocked = not bool(settings.openai_api_key)
+    is_mocked = not bool(settings.gemini_api_key)
 
     # 1단계: 입력 필터 (문제 설정에 따라 적용)
     if problem.get("use_input_filter", True):
