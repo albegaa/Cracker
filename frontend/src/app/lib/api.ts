@@ -200,7 +200,7 @@ import {
   export async function getSolvedProblems(): Promise<string[]> {
     if (USE_MOCK) {
       await delay(300)
-      return ['test-001', 'test-002']  // 1, 2번 푼 상태 → 3번까지 열려야 함
+      return ['test-001', 'test-002', 'test-003']  // 1, 2번 푼 상태 → 3번까지 열려야 함
     }
 
     const token = getToken()
