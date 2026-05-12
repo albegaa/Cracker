@@ -195,6 +195,32 @@ import {
     if (!res.ok) throw new Error('로그를 불러오지 못했습니다.')
     return res.json()
   }
+
+  // 내가 해결한 문제 목록 조회 (인증 필요)
+  export async function getSolvedProblems(): Promise<string[]> {
+    if (USE_MOCK) {
+      await delay(300)
+      return ['test-001', 'test-002']  // 1, 2번 푼 상태 → 3번까지 열려야 함
+    }
+
+    const token = getToken()
+    const res = await fetch(`${BASE_URL}/api/logs/me/solved`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+
+    if (res.status === 401) {
+      removeToken()
+      window.location.href = '/login'
+      throw new Error('로그인이 필요합니다.')
+    }
+
+    if (!res.ok) throw new Error('해결한 문제 목록을 불러오지 못했습니다.')
+
+    const data = await res.json()
+    return data.solved_problem_ids  
+  }
+
+  // Mock 딜레이 함수 ───────────────────────────────────
   
   // Mock 딜레이 함수 ───────────────────────────────────
   // 실제 API 로딩처럼 보이기 위해
