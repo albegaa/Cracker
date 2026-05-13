@@ -22,12 +22,12 @@ const difficultyStyle: Record<string, string> = {
 }
 
 const attackTypeGuide: Record<string, string> = {
-    prompt_injection: 'AI가 숨기고 있는 비밀 정보를 프롬프트 조작으로 끌어내보세요.',
-    prompt_leaking: '시스템에 숨겨진 지시사항을 프롬프트를 통해 유출시켜보세요.',
-    jailbreak: '프롬프트를 창의적으로 활용해 AI의 제한을 풀어보세요.',
-    obfuscation: '다양한 우회 기법으로 필터를 속이고 공격에 성공해보세요.',
-    challenge: '지금까지 배운 모든 기법을 총동원해 최고 난이도의 방어를 뚫어보세요.',
-  }
+  prompt_injection: 'AI가 숨기고 있는 비밀 정보를 프롬프트 조작으로 끌어내보세요.',
+  prompt_leaking: '시스템에 숨겨진 지시사항을 프롬프트를 통해 유출시켜보세요.',
+  jailbreak: '프롬프트를 창의적으로 활용해 AI의 제한을 풀어보세요.',
+  obfuscation: '다양한 우회 기법으로 필터를 속이고 공격에 성공해보세요.',
+  challenge: '지금까지 배운 모든 기법을 총동원해 최고 난이도의 방어를 뚫어보세요.',
+}
 
 function getResultMessage(response: AttackResponse): { message: string; color: string } {
   if (response.blocked_at === 'input' && !response.is_success) {
@@ -62,6 +62,8 @@ export default function PracticePage() {
   const [isSending, setIsSending] = useState(false)
   const [showHint, setShowHint] = useState(false)
   const [error, setError] = useState('')
+  const [isSuccess, setIsSuccess] = useState(false)              // 공격 성공 여부
+  const [showExitConfirm, setShowExitConfirm] = useState(false)  // 종료 확인 멘트 표시 여부
 
   const chatBottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -104,6 +106,11 @@ export default function PracticePage() {
     try {
       const response = await submitAttack(id, userMessage.content)
 
+      // 공격 성공 시 state 업데이트
+      if (response.is_success) {
+        setIsSuccess(true)
+      }
+
       if (response.blocked_at !== 'input') {
         const aiMessage: Message = {
           role: 'ai',
@@ -138,6 +145,7 @@ export default function PracticePage() {
     setInput('')
     setError('')
     setShowHint(false)
+    setShowExitConfirm(false)
     inputRef.current?.focus()
   }
 
@@ -167,14 +175,14 @@ export default function PracticePage() {
 
         {/* 뒤로가기 버튼 */}
         <button
-            onClick={() => router.push('/problems')}
-            className="flex items-center gap-2 text-sm text-gray-500 hover:text-black transition-colors"
+          onClick={() => router.push('/problems')}
+          className="flex items-center gap-2 text-sm text-gray-500 hover:text-black transition-colors"
         >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 12H5" />
-                <path d="M12 19l-7-7 7-7" />
-             </svg>
-            문제 목록으로
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5" />
+            <path d="M12 19l-7-7 7-7" />
+          </svg>
+          문제 목록으로
         </button>
 
         {/* 문제 정보 카드 */}
@@ -189,13 +197,13 @@ export default function PracticePage() {
           <div className="rounded-lg bg-gray-50 border border-gray-200 p-4">
             <p className="mb-2 text-sm font-semibold text-black">목표:</p>
             <p className="text-sm leading-relaxed text-gray-600">
-                {problem!.description}{' '}
-                <span className="text-gray-800 font-medium">
-                    {attackTypeGuide[problem!.attack_type] ?? ''}
-                </span>
+              {problem!.description}{' '}
+              <span className="text-gray-800 font-medium">
+                {attackTypeGuide[problem!.attack_type] ?? ''}
+              </span>
             </p>
+          </div>
         </div>
-    </div>    
 
         {/* 채팅 인터페이스 카드 */}
         <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
@@ -261,6 +269,20 @@ export default function PracticePage() {
             <div ref={chatBottomRef} />
           </div>
 
+          {/* 공격 성공 축하 멘트 */}
+          {isSuccess && (
+            <div className="mx-6 mt-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 font-medium">
+              🎉 축하합니다! 공격에 성공했어요. 종료 버튼을 눌러 결과를 확인해보세요!
+            </div>
+          )}
+
+          {/* 종료 확인 경고 멘트 */}
+          {!isSuccess && showExitConfirm && (
+            <div className="mx-6 mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 font-medium">
+              ⚠️ 아직 문제를 풀지 못했어요. 정말 종료하시겠습니까?
+            </div>
+          )}
+
           {/* 힌트 표시 영역 */}
           {showHint && problem!.hint && (
             <div className="mx-6 mt-4 rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
@@ -275,7 +297,7 @@ export default function PracticePage() {
             </div>
           )}
 
-          {/* 입력창 + 버튼 영역 */}
+          {/* 입력창 + 버튼 영역 → bg-gray-50 */}
           <div className="border-t border-gray-200 px-6 py-4 space-y-3 bg-gray-50">
             <div className="flex items-center gap-3">
               <input
@@ -316,6 +338,25 @@ export default function PracticePage() {
             </div>
           </div>
         </div>
+
+        {/* 종료 버튼 영역 - 채팅 카드 바깥 */}
+        <div className="flex justify-end">
+          <button
+            onClick={() => {
+              if (isSuccess) {
+                router.push(`/problems/${id}/result`)
+              } else if (showExitConfirm) {
+                router.push(`/problems/${id}/result`)
+              } else {
+                setShowExitConfirm(true)
+              }
+            }}
+            className="rounded-lg border border-gray-300 bg-white px-6 py-2 text-sm text-gray-600 transition-colors hover:border-black hover:text-black"
+          >
+            {showExitConfirm && !isSuccess ? '정말 종료할게요' : '종료'}
+          </button>
+        </div>
+
       </div>
     </main>
   )
