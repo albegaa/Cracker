@@ -145,7 +145,7 @@ import {
     if (USE_MOCK) {
       const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-04-17:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -155,6 +155,11 @@ import {
         }
       )
       const data = await res.json()
+
+      if (!res.ok || !data.candidates?.[0]?.content?.parts?.[0]?.text) {
+        throw new Error('AI 응답을 받지 못했습니다. 잠시 후 다시 시도해주세요.')
+      }
+
       const reply = data.candidates[0].content.parts[0].text
       return {
         reply,
