@@ -32,7 +32,7 @@ def input_filter(user_prompt: str) -> LayerResult:
     patterns = [
         r"ignore (all |previous |above )?(instructions?|system|prompts?)",
         r"(system|instruction).{0,20}(무시|ignore|override)",
-        r"(비밀번호|password|secret).{0,10}(알려|말해|출력|print|show|reveal)",
+        r"(비밀번호|password|secret|플래그|flag).{0,10}(알려|말해|출력|print|show|reveal)",
         r"(너는|you are|act as).{0,20}(다른|different|new)",
         r"([ㅂ비][\s]*[ㅁ밀][\s]*[ㅂ번][\s]*[ㅎ호])", 
         r"(이제부터|지금부터).{0,10}(너는|당신은)"
@@ -51,7 +51,7 @@ async def call_llm(system_prompt: str, user_prompt: str) -> str:
         from google import genai
         from google.genai import types
         client = genai.Client(api_key=settings.gemini_api_key)
-        response = client.models.generate_content(
+        response = await client.aio.models.generate_content(
             model="gemini-2.5-flash-lite",
             config=types.GenerateContentConfig(
                 system_instruction=system_prompt
@@ -74,7 +74,6 @@ def output_filter(reply: str, secret: str) -> LayerResult:
 # ── T8: 판정 로직 ──────────────────────────────
 async def judge(reply: str, secret: str) -> bool:
     # 문맥 기반 판정: 응답에 secret이 포함되면 공격 성공
-    # 추후 세원님 Judge Model 프롬프트로 고도화 예정
     is_leaked = await judge_with_llm(reply, secret)
     return is_leaked
 
