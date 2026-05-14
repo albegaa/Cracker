@@ -26,6 +26,7 @@ class AttackResponse(BaseModel):
     reply: str
     is_success: bool
     blocked_at: str = ""
+    result_type: str = ""  # 추가
     is_mocked: bool = False
 
 def input_filter(user_prompt: str) -> LayerResult:
@@ -45,6 +46,16 @@ def input_filter(user_prompt: str) -> LayerResult:
                 reason=f"입력 단계에서 공격 패턴 감지"
             )
     return LayerResult(passed=True)
+
+def get_result_type(blocked_at: str, is_success: bool) -> str:
+    if blocked_at == "input":
+        return "blocked_input"
+    elif blocked_at == "output":
+        return "blocked_output"
+    elif not is_success:
+        return "defended"
+    else:
+        return "success"
 
 async def call_llm(system_prompt: str, user_prompt: str) -> str:
     if settings.gemini_api_key:
@@ -114,6 +125,7 @@ async def handle_attack(
                 reply="입력이 보안 정책에 의해 차단되었습니다.",
                 is_success=False,
                 blocked_at="input",
+                result_type="blocked_input",
                 is_mocked=is_mocked
             )
 
@@ -138,11 +150,13 @@ async def handle_attack(
                 reply="응답이 보안 정책에 의해 차단되었습니다.",
                 is_success=False,
                 blocked_at="output",
+                result_type="blocked_output",
                 is_mocked=is_mocked
             )
 
     # T8: 판정
     is_success = await judge(reply, secret)
+    result_type = get_result_type("", is_success)
 
     await logs_col.insert_one({
         "user_id": hashlib.sha256(user_id.encode()).hexdigest()[:16],
@@ -159,5 +173,6 @@ async def handle_attack(
         reply=reply,
         is_success=is_success,
         blocked_at="",
+        result_type=result_type,
         is_mocked=is_mocked
     )
