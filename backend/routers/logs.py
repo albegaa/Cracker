@@ -41,3 +41,20 @@ async def get_solved_problems(user_id: str = Depends(get_current_user)):
     solved_problem_ids = list(set([log["problem_id"] for log in logs]))
     
     return {"solved_problem_ids": solved_problem_ids}
+
+# 내가 푼 특정 문제 마지막 로그 조회
+@router.get("/me/problem/{problem_id}")
+async def get_my_last_log(problem_id: str, user_id: str = Depends(get_current_user)):
+    hashed_user_id = hashlib.sha256(user_id.encode()).hexdigest()[:16]
+    
+    log = await logs_col.find_one(
+        {"user_id": hashed_user_id, "problem_id": problem_id},
+        sort=[("created_at", -1)]  # 가장 최근 로그
+    )
+    
+    if not log:
+        raise HTTPException(404, "로그를 찾을 수 없습니다")
+    
+    log["id"] = str(log["_id"])
+    del log["_id"]
+    return log
