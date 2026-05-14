@@ -63,7 +63,7 @@ async def call_llm(system_prompt: str, user_prompt: str) -> str:
         from google.genai import types
         try:
             client = genai.Client(api_key=settings.gemini_api_key)
-            response = await client.aio.models.generate_content(
+            response = client.models.generate_content(
                 model="gemini-2.5-flash-lite",
                 config=types.GenerateContentConfig(
                     system_instruction=system_prompt
