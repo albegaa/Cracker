@@ -61,15 +61,21 @@ async def call_llm(system_prompt: str, user_prompt: str) -> str:
     if settings.gemini_api_key:
         from google import genai
         from google.genai import types
-        client = genai.Client(api_key=settings.gemini_api_key)
-        response = await client.aio.models.generate_content(
-            model="gemini-2.5-flash-lite",
-            config=types.GenerateContentConfig(
-                system_instruction=system_prompt
-            ),
-            contents=user_prompt
-        )
-        return response.text
+        try:
+            client = genai.Client(api_key=settings.gemini_api_key)
+            response = await client.aio.models.generate_content(
+                model="gemini-2.5-flash-lite",
+                config=types.GenerateContentConfig(
+                    system_instruction=system_prompt
+                ),
+                contents=user_prompt
+            )
+            return response.text
+        except Exception as e:
+            error_msg = str(e)
+            if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
+                return "⚠️ AI 요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요."
+            return f"⚠️ AI 응답 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
     else:
         return f"[Mock] 입력하신 '{user_prompt}'에 대한 응답입니다. 요청하신 정보는 제공할 수 없습니다."
 
