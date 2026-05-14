@@ -30,10 +30,8 @@ async def seed():
     await problems_col.delete_many({})
     print("기존 문제 삭제 완료")
 
-    # order 자동 부여하면서 삽입
     from datetime import datetime
-    for i, scenario in enumerate(scenarios, start=1):
-        scenario["order"] = i
+    for scenario in scenarios:
         scenario["use_input_filter"] = scenario.get("use_input_filter", True)
         scenario["use_output_filter"] = scenario.get("use_output_filter", True)
         scenario["created_at"] = datetime.utcnow()
