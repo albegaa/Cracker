@@ -26,13 +26,14 @@ class AttackResponse(BaseModel):
     reply: str
     is_success: bool
     blocked_at: str = ""
+    result_type: str = ""  # 추가
     is_mocked: bool = False
 
 def input_filter(user_prompt: str) -> LayerResult:
     patterns = [
         r"ignore (all |previous |above )?(instructions?|system|prompts?)",
         r"(system|instruction).{0,20}(무시|ignore|override)",
-        r"(비밀번호|password|secret).{0,10}(알려|말해|출력|print|show|reveal)",
+        r"(비밀번호|password|secret|플래그|flag).{0,10}(알려|말해|출력|print|show|reveal)",
         r"(너는|you are|act as).{0,20}(다른|different|new)",
         r"([ㅂ비][\s]*[ㅁ밀][\s]*[ㅂ번][\s]*[ㅎ호])", 
         r"(이제부터|지금부터).{0,10}(너는|당신은)"
@@ -46,12 +47,22 @@ def input_filter(user_prompt: str) -> LayerResult:
             )
     return LayerResult(passed=True)
 
+def get_result_type(blocked_at: str, is_success: bool) -> str:
+    if blocked_at == "input":
+        return "blocked_input"
+    elif blocked_at == "output":
+        return "blocked_output"
+    elif not is_success:
+        return "defended"
+    else:
+        return "success"
+
 async def call_llm(system_prompt: str, user_prompt: str) -> str:
     if settings.gemini_api_key:
         from google import genai
         from google.genai import types
         client = genai.Client(api_key=settings.gemini_api_key)
-        response = client.models.generate_content(
+        response = await client.aio.models.generate_content(
             model="gemini-2.5-flash-lite",
             config=types.GenerateContentConfig(
                 system_instruction=system_prompt
@@ -74,7 +85,6 @@ def output_filter(reply: str, secret: str) -> LayerResult:
 # ── T8: 판정 로직 ──────────────────────────────
 async def judge(reply: str, secret: str) -> bool:
     # 문맥 기반 판정: 응답에 secret이 포함되면 공격 성공
-    # 추후 세원님 Judge Model 프롬프트로 고도화 예정
     is_leaked = await judge_with_llm(reply, secret)
     return is_leaked
 
@@ -114,6 +124,7 @@ async def handle_attack(
                 reply="입력이 보안 정책에 의해 차단되었습니다.",
                 is_success=False,
                 blocked_at="input",
+                result_type="blocked_input",
                 is_mocked=is_mocked
             )
 
@@ -138,11 +149,13 @@ async def handle_attack(
                 reply="응답이 보안 정책에 의해 차단되었습니다.",
                 is_success=False,
                 blocked_at="output",
+                result_type="blocked_output",
                 is_mocked=is_mocked
             )
 
     # T8: 판정
     is_success = await judge(reply, secret)
+    result_type = get_result_type("", is_success)
 
     await logs_col.insert_one({
         "user_id": hashlib.sha256(user_id.encode()).hexdigest()[:16],
@@ -159,5 +172,6 @@ async def handle_attack(
         reply=reply,
         is_success=is_success,
         blocked_at="",
+        result_type=result_type,
         is_mocked=is_mocked
     )

@@ -6,7 +6,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { getProblems, isLoggedIn } from '../lib/api'
+import { getProblems, getSolvedProblems, isLoggedIn } from '../lib/api'
 import { type Problem } from '../lib/mockData'
 
 const difficultyLabel = {
@@ -26,6 +26,7 @@ export default function ProblemsPage() {
 
   // 전체 문제 목록 (API로 받아온 원본 데이터)
   const [problems, setProblems] = useState<Problem[]>([])
+  const [solvedIds, setSolvedIds] = useState<string[]>([])  // 내가 해결한 문제 ID 목록
   const [isLoading, setIsLoading] = useState(true)
 
   // 현재 선택된 필터 상태
@@ -37,11 +38,22 @@ export default function ProblemsPage() {
       router.push('/login')
       return
     }
-    getProblems().then((data) => {
-      setProblems(data)
+    Promise.all([getProblems(), getSolvedProblems()]).then(([problemData, solvedData]) => {
+      setProblems(problemData)
+      setSolvedIds(solvedData)
       setIsLoading(false)
     })
   }, [router])
+
+// 잠금 처리 로직
+// order 기준으로 이전 문제(order - 1)가 solved에 있어야 열림
+// order가 없는 문제나 첫 번째 문제(order === 1)는 항상 열림
+function isLocked(problem: Problem): boolean {
+  if (!problem.order || problem.order === 1) return false
+  const prevProblem = problems.find((p) => p.order === problem.order! - 1)
+  if (!prevProblem) return false
+  return !solvedIds.includes(prevProblem.id)
+}
 
   // 필터링 로직
   // problems 배열에서 선택된 조건에 맞는 문제만 고름
@@ -72,6 +84,7 @@ export default function ProblemsPage() {
         >
           <option value="all">공격 유형 - 전체</option>
           <option value="prompt_injection">프롬프트 인젝션</option>
+          <option value="prompt_leaking">프롬프트 리킹</option>
           <option value="jailbreak">탈옥</option>
           <option value="obfuscation">난독화</option>
           <option value="challenge">챌린지</option>
@@ -98,33 +111,45 @@ export default function ProblemsPage() {
         <p className="text-sm text-gray-400">해당하는 문제가 없습니다.</p>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredProblems.map((problem) => (
-            <div
-              key={problem.id}
-              className="flex flex-col justify-between rounded-xl border border-gray-200 bg-white p-6"
-            >
-              {/* 뱃지 */}
-              <div className="mb-4 flex items-center justify-between">
-                <span className={`rounded-full px-3 py-1 text-xs font-medium ${difficultyStyle[problem.difficulty]}`}>
-                  {difficultyLabel[problem.difficulty]}
-                </span>
-              </div>
-
-              {/* 문제 정보 */}
-              <div className="mb-6 flex-1">
-                <h2 className="mb-2 text-base font-semibold text-black">{problem.title}</h2>
-                <p className="text-sm leading-relaxed text-gray-500">{problem.description}</p>
-              </div>
-
-              {/* 시작하기 버튼 */}
-              <button
-                onClick={() => router.push(`/problems/${problem.id}`)}
-                className="w-full rounded-lg bg-black py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-80"
+          {filteredProblems.map((problem) => {
+            const locked = isLocked(problem)
+            return (
+              <div
+                key={problem.id}
+                className={`flex flex-col justify-between rounded-xl border border-gray-200 bg-white p-6 ${locked ? 'opacity-50' : ''}`}
               >
-                시작하기
-              </button>
-            </div>
-          ))}
+                {/* 뱃지 */}
+                <div className="mb-4 flex items-center justify-between">
+                  <span className={`rounded-full px-3 py-1 text-xs font-medium ${difficultyStyle[problem.difficulty]}`}>
+                    {difficultyLabel[problem.difficulty]}
+                  </span>
+                  {/* 잠금 아이콘 */}
+                  {locked && (
+                    <span className="text-sm text-gray-400">🔒</span>
+                  )}
+                </div>
+
+                {/* 문제 정보 */}
+                <div className="mb-6 flex-1">
+                  <h2 className="mb-2 text-base font-semibold text-black">{problem.title}</h2>
+                  <p className="text-sm leading-relaxed text-gray-500">{problem.description}</p>
+                </div>
+
+                {/* 시작하기 / 잠금 버튼 */}
+                <button
+                  onClick={() => !locked && router.push(`/problems/${problem.id}`)}
+                  disabled={locked}
+                  className={`w-full rounded-lg py-2.5 text-sm font-medium transition-opacity
+                    ${locked
+                      ? 'cursor-not-allowed bg-gray-200 text-gray-400'
+                      : 'bg-black text-white hover:opacity-80'
+                    }`}
+                >
+                  {locked ? '이전 문제를 먼저 풀어주세요' : '시작하기'}
+                </button>
+              </div>
+            )
+          })}
         </div>
       )}
     </main>

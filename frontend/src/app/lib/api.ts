@@ -143,8 +143,30 @@ import {
     userPrompt: string
   ): Promise<AttackResponse> {
     if (USE_MOCK) {
-      await delay(800)
-      return mockAttackResponse
+      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: userPrompt }] }],
+          }),
+        }
+      )
+      const data = await res.json()
+
+      if (!res.ok || !data.candidates?.[0]?.content?.parts?.[0]?.text) {
+        throw new Error('AI 응답을 받지 못했습니다. 잠시 후 다시 시도해주세요.')
+      }
+
+      const reply = data.candidates[0].content.parts[0].text
+      return {
+        reply,
+        is_success: false,
+        blocked_at: '',
+        is_mocked: true,
+      }
     }
   
     const token = getToken()
@@ -157,18 +179,14 @@ import {
       body: JSON.stringify({ problem_id: problemId, user_prompt: userPrompt }),
     })
   
-    if (res.status === 401) { // 토큰 없거나 만료된 경우, 로그인 페이지로 강제 이동
-        removeToken()
-        window.location.href = '/login'
-        throw new Error('로그인이 필요합니다.')
-      }
-      if (res.status === 404) {
-        throw new Error('문제를 찾을 수 없습니다.')
-      }
-      if (!res.ok) {
-        throw new Error('공격 실행에 실패했습니다.')
-      }
-
+    if (res.status === 401) {
+      removeToken()
+      window.location.href = '/login'
+      throw new Error('로그인이 필요합니다.')
+    }
+    if (res.status === 404) throw new Error('문제를 찾을 수 없습니다.')
+    if (!res.ok) throw new Error('공격 실행에 실패했습니다.')
+  
     return res.json()
   }
   
@@ -195,6 +213,32 @@ import {
     if (!res.ok) throw new Error('로그를 불러오지 못했습니다.')
     return res.json()
   }
+
+  // 내가 해결한 문제 목록 조회 (인증 필요)
+  export async function getSolvedProblems(): Promise<string[]> {
+    if (USE_MOCK) {
+      await delay(300)
+      return ['test-001', 'test-002', 'test-003']  // 1, 2번 푼 상태 → 3번까지 열려야 함
+    }
+
+    const token = getToken()
+    const res = await fetch(`${BASE_URL}/api/logs/me/solved`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+
+    if (res.status === 401) {
+      removeToken()
+      window.location.href = '/login'
+      throw new Error('로그인이 필요합니다.')
+    }
+
+    if (!res.ok) throw new Error('해결한 문제 목록을 불러오지 못했습니다.')
+
+    const data = await res.json()
+    return data.solved_problem_ids  
+  }
+
+  // Mock 딜레이 함수 ───────────────────────────────────
   
   // Mock 딜레이 함수 ───────────────────────────────────
   // 실제 API 로딩처럼 보이기 위해
