@@ -146,6 +146,7 @@ export default function PracticePage() {
     setError('')
     setShowHint(false)
     setShowExitConfirm(false)
+    setIsSuccess(false)
     inputRef.current?.focus()
   }
 
@@ -346,7 +347,8 @@ export default function PracticePage() {
               if (isSuccess) {
                 router.push(`/problems/${id}/result`)
               } else if (showExitConfirm) {
-                router.push(`/problems/${id}/result`)
+                // 이번 시도에서 성공하지 않고 종료 — 과거 성공 로그와 구분
+                router.push(`/problems/${id}/result?outcome=fail`)
               } else {
                 setShowExitConfirm(true)
               }

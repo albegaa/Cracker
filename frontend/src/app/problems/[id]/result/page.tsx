@@ -6,7 +6,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { getLastAttackLog, getProblem, getProblems, isLoggedIn } from '../../../lib/api'
 import { type LastAttackLog, type Problem } from '../../../lib/mockData'
 
@@ -49,7 +49,9 @@ const failureGuide: Record<string, string> = {
 export default function ResultPage() {
   const params = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const id = params.id as string
+  const sessionFailed = searchParams.get('outcome') === 'fail'
 
   const [log, setLog] = useState<LastAttackLog | null>(null)
   const [problem, setProblem] = useState<Problem | null>(null)
@@ -63,11 +65,14 @@ export default function ResultPage() {
       return
     }
 
-    Promise.all([
-      getLastAttackLog(id),
-      getProblem(id),
-      getProblems(),
-    ])
+    const loadLog = sessionFailed
+      ? getLastAttackLog(id).catch((err) => {
+          if (err.message === '로그를 찾을 수 없습니다.') return null
+          throw err
+        })
+      : getLastAttackLog(id)
+
+    Promise.all([loadLog, getProblem(id), getProblems()])
       .then(([logData, problemData, allProblems]) => {
         setLog(logData)
         setProblem(problemData)
@@ -82,7 +87,7 @@ export default function ResultPage() {
       .finally(() => {
         setIsLoading(false)
       })
-  }, [id, router])
+  }, [id, router, sessionFailed])
 
   if (isLoading) {
     return (
@@ -94,8 +99,8 @@ export default function ResultPage() {
     )
   }
 
-  // 404 — 아직 이 문제를 시도하지 않은 경우
-  if (error === '로그를 찾을 수 없습니다.') {
+  // 404 — 아직 이 문제를 시도하지 않은 경우 (이번 시도 실패 종료는 제외)
+  if (error === '로그를 찾을 수 없습니다.' && !sessionFailed) {
     return (
       <main className="min-h-screen bg-gray-100 px-6 py-12">
         <div className="mx-auto max-w-2xl text-center space-y-4">
@@ -121,7 +126,8 @@ export default function ResultPage() {
     )
   }
 
-  const isSuccess = log?.is_success ?? false
+  // outcome=fail: 이번 시도 미성공 종료 — 과거 성공 로그가 있어도 Failed 표시
+  const isSuccess = sessionFailed ? false : (log?.is_success ?? false)
   const attackType = problem?.attack_type ?? ''
 
   return (
