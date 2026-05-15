@@ -89,7 +89,7 @@ def output_filter(reply: str, secret: str) -> LayerResult:
     return LayerResult(passed=True)
 
 # ── T8: 판정 로직 ──────────────────────────────
-async def judge(reply: str, secret: str) -> bool:
+async def judge(reply: str, secret: str) -> tuple [bool, str]:
     # 문맥 기반 판정: 응답에 secret이 포함되면 공격 성공
     is_leaked, reason = await judge_with_llm(reply, secret)
     return is_leaked, reason
