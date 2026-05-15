@@ -46,7 +46,7 @@ export default function Navbar() {
               <div key={i} className="rounded-sm bg-white" />
             ))}
           </div>
-          <span className="text-lg font-semibold">Cracker</span>
+          <span className="text-lg font-semibold text-black">Cracker</span>
         </Link>
 
         <div className="flex items-center gap-8">

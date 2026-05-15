@@ -65,7 +65,7 @@ export default function LoginPage() {
               <div key={i} className="rounded-sm bg-white" />
             ))}
           </div>
-          <h1 className="text-2xl font-bold">Cracker</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Cracker</h1>
           <p className="mt-1 text-sm text-gray-500">LLM 보안 학습 플랫폼</p>
         </div>
 
@@ -80,7 +80,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="user@example.com"
-              className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-black"
+              className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-black"
               onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
             />
           </div>
@@ -95,7 +95,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="비밀번호를 입력하세요"
-                className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-black"
+                className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-black"
                 onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
               />
               <button
