@@ -91,8 +91,8 @@ def output_filter(reply: str, secret: str) -> LayerResult:
 # ── T8: 판정 로직 ──────────────────────────────
 async def judge(reply: str, secret: str) -> bool:
     # 문맥 기반 판정: 응답에 secret이 포함되면 공격 성공
-    is_leaked = await judge_with_llm(reply, secret)
-    return is_leaked
+    is_leaked, reason = await judge_with_llm(reply, secret)
+    return is_leaked, reason
 
 # ── 메인 엔드포인트 ──────────────────────────────
 @router.post("/", response_model=AttackResponse)
@@ -160,7 +160,7 @@ async def handle_attack(
             )
 
     # T8: 판정
-    is_success = await judge(reply, secret)
+    is_success, judge_reason = await judge(reply, secret)
     result_type = get_result_type("", is_success)
 
     await logs_col.insert_one({
@@ -169,6 +169,7 @@ async def handle_attack(
         "attack_prompt": req.user_prompt,
         "response": reply,
         "is_success": is_success,
+        "judge_reason": judge_reason,
         "blocked_at": "",
         "attack_type": "passed",
         "created_at": datetime.utcnow()
