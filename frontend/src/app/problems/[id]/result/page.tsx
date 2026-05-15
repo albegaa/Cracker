@@ -259,7 +259,10 @@ export default function ResultPage() {
     </button>
   ) : (
     <button
-      onClick={() => router.push('/learn')}
+      onClick={() => {
+        const learnType = attackType in learnButtonLabel ? attackType : 'prompt_injection'
+        router.push(`/learn?type=${learnType}`)
+      }}
       className="flex flex-1 items-center justify-center rounded-lg bg-black px-6 py-3 text-sm font-medium text-white transition-opacity hover:opacity-80"
     >
       {learnButtonLabel[attackType] ?? '학습하러 가기'}

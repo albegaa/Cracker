@@ -15,8 +15,8 @@ import {
   } from './mockData'
   
   // TODO: 백엔드 연동 시 false 변경 필요
-  const USE_MOCK = true // false
-  const BASE_URL = 'http://localhost:3000'  // 'https://cracker-api.onrender.com'
+  const USE_MOCK = false // false
+  const BASE_URL = 'https://cracker-api.onrender.com'  // 'https://cracker-api.onrender.com'
   
   // 토큰 관리 함수 ─────────────────────────────────────────
   
