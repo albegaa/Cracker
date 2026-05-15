@@ -6,10 +6,12 @@
 import {
     mockProblems,
     mockAttackResponse,
+    mockLastAttackLog,
     mockLogs,
     type Problem,
     type AttackResponse,
     type AttackLog,
+    type LastAttackLog,
   } from './mockData'
   
   // 백엔드 연동 시 false 변경 필요
@@ -237,6 +239,30 @@ import {
     const data = await res.json()
     return data.solved_problem_ids  
   }
+
+  // 마지막 공격 로그 조회 (인증 필요)
+// 결과 확인 페이지에서 사용
+export async function getLastAttackLog(problemId: string): Promise<LastAttackLog> {
+  if (USE_MOCK) {
+    await delay(300)
+    return mockLastAttackLog
+  }
+
+  const token = getToken()
+  const res = await fetch(`${BASE_URL}/api/logs/me/problem/${problemId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+
+  if (res.status === 401) {
+    removeToken()
+    window.location.href = '/login'
+    throw new Error('로그인이 필요합니다.')
+  }
+  if (res.status === 404) throw new Error('로그를 찾을 수 없습니다.')
+  if (!res.ok) throw new Error('결과를 불러오지 못했습니다.')
+
+  return res.json()
+}
 
   // Mock 딜레이 함수 ───────────────────────────────────
   
