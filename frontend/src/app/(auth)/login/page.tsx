@@ -65,7 +65,7 @@ export default function LoginPage() {
               <div key={i} className="rounded-sm bg-white" />
             ))}
           </div>
-          <h1 className="text-2xl font-bold">Cracker</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Cracker</h1>
           <p className="mt-1 text-sm text-gray-500">LLM 보안 학습 플랫폼</p>
         </div>
 
