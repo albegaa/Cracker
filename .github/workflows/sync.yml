@@ -1,18 +1,36 @@
 name: Sync Fork
+
 on:
   schedule:
-    - cron: '0 * * * *'  # 매 시간마다 자동 sync
+    - cron: '0 * * * *'
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   sync:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-      - name: Sync fork
+      - name: Checkout fork
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
         run: |
-          git remote add upstream https://github.com/lrycro/Cracker
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Set upstream
+        run: |
+          git remote remove upstream || true
+          git remote add upstream https://github.com/lrycro/Cracker.git
+
+      - name: Sync main
+        run: |
           git fetch upstream
           git checkout main
-          git merge upstream/main
-          git push
+          git merge upstream/main --no-edit || exit 1
+          git push origin main
