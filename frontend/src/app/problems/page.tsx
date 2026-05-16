@@ -5,7 +5,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { getProblems, getSolvedProblems, isLoggedIn } from '../lib/api'
 import { type Problem } from '../lib/mockData'
 
@@ -23,6 +23,7 @@ const difficultyStyle = {
 
 export default function ProblemsPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   // 전체 문제 목록 (API로 받아온 원본 데이터)
   const [problems, setProblems] = useState<Problem[]>([])
@@ -30,7 +31,8 @@ export default function ProblemsPage() {
   const [isLoading, setIsLoading] = useState(true)
 
   // 현재 선택된 필터 상태
-  const [selectedType, setSelectedType] = useState('all') 
+  // ?type= 쿼리 파라미터로 초기값 설정 (learn 페이지에서 넘어올 때 자동 필터 적용)
+  const [selectedType, setSelectedType] = useState(() => searchParams.get('type') ?? 'all')
   const [selectedDiff, setSelectedDiff] = useState('all')
 
   useEffect(() => {
