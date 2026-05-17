@@ -368,7 +368,7 @@ export default function LearnPage() {
               {/* 발생할 수 있는 문제 */}
               <section>
                 <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-400">
-                  Why It's Hard to Defend
+                  Why It&apos;s Hard to Defend
                 </h3>
                 <ul className="space-y-2">
                   {current.problems.map((p, i) => (
