@@ -7,6 +7,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { Suspense } from 'react'
 
 // ── 탭 정의 ─────────────────────────────────────────────────
 
@@ -260,7 +261,15 @@ const content: Record<AttackType, LearnContent> = {
 
 // ── 컴포넌트 ─────────────────────────────────────────────────
 
-export default function LearnPage() {
+export default function LearnPage() {  // ← 새로 추가
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-100" />}>
+      <LearnContent />
+    </Suspense>
+  )
+}
+
+function LearnContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
