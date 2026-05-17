@@ -6,7 +6,10 @@ app = FastAPI(title="Cracker API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "https://cracker-xi32.vercel.app",  # 추가
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

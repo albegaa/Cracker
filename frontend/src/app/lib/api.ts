@@ -5,7 +5,6 @@
 
 import {
     mockProblems,
-    mockAttackResponse,
     mockLastAttackLog,
     mockLogs,
     type Problem,
