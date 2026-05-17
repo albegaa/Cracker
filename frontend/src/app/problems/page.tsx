@@ -4,7 +4,7 @@
 
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { getProblems, getSolvedProblems, isLoggedIn } from '../lib/api'
 import { type Problem } from '../lib/mockData'
@@ -21,7 +21,7 @@ const difficultyStyle = {
   hard: 'bg-black text-white',
 }
 
-export default function ProblemsPage() {
+function ProblemsContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -155,5 +155,13 @@ function isLocked(problem: Problem): boolean {
         </div>
       )}
     </main>
+  )
+}
+
+export default function ProblemsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen" />}>
+      <ProblemsContent />
+    </Suspense>
   )
 }
