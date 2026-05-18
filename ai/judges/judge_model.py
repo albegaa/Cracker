@@ -51,7 +51,7 @@ async def judge_with_llm(reply: str, secret: str) -> tuple[bool, str]:
 
     try:
         # Gemini 2.5 Flash-Lite 모델 세팅
-        model = genai.GenerativeModel('gemini-2.5-flash-lite')
+        model = genai.GenerativeModel('gemini-3.1-flash-lite')
         
         # 비동기로 답변 생성 (일관된 판정을 위해 temperature=0.0 설정)
         response = await model.generate_content_async(
