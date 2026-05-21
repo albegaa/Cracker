@@ -1,4 +1,4 @@
-# Cracker 🔓
+# Cracker
 
 ### Korean Prompt Injection CTF / Wargame Platform  
 **2026 CNU Capstone Design 1**
