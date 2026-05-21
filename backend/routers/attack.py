@@ -64,6 +64,7 @@ async def call_llm(system_prompt: str, user_prompt: str) -> str:
         try:
             client = genai.Client(api_key=settings.gemini_api_key)
             response = client.models.generate_content(
+                # Gemini 3.1 Flash-Lite
                 model="gemini-3.1-flash-lite",
                 config=types.GenerateContentConfig(
                     system_instruction=system_prompt
