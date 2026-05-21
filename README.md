@@ -175,7 +175,7 @@ This structure is one of Cracker’s key values. Learners improve through practi
                 ▼
 ┌──────────────────────────────────────────────┐
 │ Security Layer                               │
-│ JWT / bcrypt / SHA-256 / filters             │
+│ JWT / bcrypt / SHA-256                       │
 └──────────────────────────────────────────────┘
 ```
 
