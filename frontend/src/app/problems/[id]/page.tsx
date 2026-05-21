@@ -64,6 +64,7 @@ export default function PracticePage() {
   const [error, setError] = useState('')
   const [isSuccess, setIsSuccess] = useState(false)              // 공격 성공 여부
   const [showExitConfirm, setShowExitConfirm] = useState(false)  // 종료 확인 멘트 표시 여부
+  const [hasAttemptedThisSession, setHasAttemptedThisSession] = useState(false)  // 이번 세션 공격 시도 여부
 
   const chatBottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -105,6 +106,7 @@ export default function PracticePage() {
 
     try {
       const response = await submitAttack(id, userMessage.content)
+      setHasAttemptedThisSession(true)
 
       // 공격 성공 시 state 업데이트
       if (response.is_success) {
@@ -147,6 +149,7 @@ export default function PracticePage() {
     setShowHint(false)
     setShowExitConfirm(false)
     setIsSuccess(false)
+    setHasAttemptedThisSession(false)
     inputRef.current?.focus()
   }
 
@@ -347,8 +350,10 @@ export default function PracticePage() {
               if (isSuccess) {
                 router.push(`/problems/${id}/result`)
               } else if (showExitConfirm) {
-                // 이번 시도에서 성공하지 않고 종료 — 과거 성공 로그와 구분
-                router.push(`/problems/${id}/result?outcome=fail`)
+                // 이번 시도에서 성공하지 않고 종료 — 과거 로그와 이번 세션 시도 여부 구분
+                router.push(
+                  `/problems/${id}/result?outcome=fail&attempted=${hasAttemptedThisSession ? '1' : '0'}`
+                )
               } else {
                 setShowExitConfirm(true)
               }
