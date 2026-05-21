@@ -314,7 +314,7 @@ http://localhost:3000
 
 ---
 
-## 🚀 Deployment
+## Deployment
 
 | Service | Platform | URL |
 |---------|----------|-----|
@@ -322,5 +322,5 @@ http://localhost:3000
 | Backend | Render | https://cracker-api.onrender.com |
 | Database | MongoDB Atlas | cracker-db.is0eyjg.mongodb.net |
 
-> ⚠️ Render free tier sleeps after 15 minutes of inactivity.  
+> Render free tier sleeps after 15 minutes of inactivity.  
 > Visit `/health` before use: `https://cracker-api.onrender.com/health`
