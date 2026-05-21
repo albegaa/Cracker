@@ -146,7 +146,6 @@ This structure is one of Cracker’s key values. Learners improve through practi
 | Auth | JWT + bcrypt |
 | Deployment (FE) | Vercel |
 | Deployment (BE) | Render |
-| Version Control | GitHub |
 
 ---
 
