@@ -51,7 +51,7 @@ The platform is designed as a **learning-data improvement loop**: learner attemp
 |--------|--------|--------|--------|
 | Sign Up & Login | Browse Problems | Practice Attacks | View Results |
 | Create account | Select difficulty | Enter attack prompts | Check success/failure |
-| <img width="374" height="527" alt="image" src="https://github.com/user-attachments/assets/ece39e05-a250-4f04-91db-7011d84af9b2" /> | <img width="464" height="631" alt="image" src="https://github.com/user-attachments/assets/b31b3223-9ed0-43b2-81b3-3fd74dd95fe4" /> | <img width="466" height="598" alt="image" src="https://github.com/user-attachments/assets/7ede3fb9-b9c7-4542-a44d-072496514201" /> | <img width="424" height="540" alt="image" src="https://github.com/user-attachments/assets/cc886e4f-1a3a-48cc-8489-61ca13cf7365" /> |
+| <img width="497" height="533" alt="image" src="https://github.com/user-attachments/assets/4d69ba39-834e-4b2d-9f4b-bfd562bd02b7" /> | <img width="464" height="631" alt="image" src="https://github.com/user-attachments/assets/b31b3223-9ed0-43b2-81b3-3fd74dd95fe4" /> | <img width="466" height="598" alt="image" src="https://github.com/user-attachments/assets/7ede3fb9-b9c7-4542-a44d-072496514201" /> | <img width="424" height="540" alt="image" src="https://github.com/user-attachments/assets/cc886e4f-1a3a-48cc-8489-61ca13cf7365" /> |
 
 #### Problem Progression (6 Levels)
 
@@ -278,13 +278,7 @@ cd Cracker
 ```bash
 cd backend
 python -m venv venv
-
-# macOS / Linux
 source venv/bin/activate
-
-# Windows
-# venv\Scripts\activate
-
 pip install -r requirements.txt
 uvicorn main:app --reload
 ```
