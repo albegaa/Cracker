@@ -1,7 +1,7 @@
 # Cracker
 
 ### Korean Prompt Injection CTF / Wargame Platform  
-**2026 CNU Capstone Design 1**
+**2026-Spring CNU Capstone Design 1**
 
 > **Learn LLM security by attacking it yourself.**  
 > Cracker is a Korean prompt injection CTF / wargame platform where learners can study LLM security threats, practice prompt injection attacks in a safe environment, and check whether their attack succeeded or was blocked.
